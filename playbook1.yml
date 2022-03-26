@@ -1,0 +1,42 @@
+---
+- hosts: 192.168.10.26
+
+  tasks:
+    - name: Installing Apache, Mysql and PHP
+      yum:
+        name:
+          - httpd
+          - mariadb-server
+          - mariadb
+          - php
+        state: installed
+    - name: Enabling and starting the httpd
+      service:
+        name: httpd
+        enabled: yes
+        state: started
+    - name: Enabling and starting MYSQL
+      service:
+        name: mariadb
+        enabled: yes
+        state: started
+    - name: copying php file
+      copy:
+        src: /root/Task1/filecopied.php
+        dest: /var/www/html/filecopied.php
+        force: yes
+    - name: Enabling Firewall rules
+      firewalld:
+        permanent: yes
+        immediate: yes 
+        service: "{{ item }}"
+        state: enabled
+      with_items:
+        - https
+        - http
+    - name: checking the php page from playbook
+      uri:
+        url: http://192.168.10.26/filecopied.php
+        method: GET
+        status_code: 200    
+        
